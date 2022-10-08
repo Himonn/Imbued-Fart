@@ -12,8 +12,9 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 import javax.inject.Inject;
 import javax.sound.sampled.*;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @PluginDescriptor(
@@ -30,8 +31,6 @@ public class ImbuedFartPlugin extends Plugin
     private ImbuedFartConfig config;
 
     private Clip clip;
-
-    String wavPath = "fart.wav";
 
     @Provides
     ImbuedFartConfig provideConfig(final ConfigManager configManager)
@@ -66,21 +65,13 @@ public class ImbuedFartPlugin extends Plugin
                 clip.close();
             }
 
-            Class pluginClass = null;
+            URL url = null;
             AudioInputStream stream = null;
-            try {
-                pluginClass = Class.forName("com.imbuedfart.ImbuedFartPlugin");
-                URL url = pluginClass.getClassLoader().getResource(wavPath);
-                stream = AudioSystem.getAudioInputStream(url);
-            } catch (ClassNotFoundException | UnsupportedAudioFileException | IOException e) {
-                e.printStackTrace();
-            }
+            int random = ThreadLocalRandom.current().nextInt(1, 11);
+            log.info(random + ".wav");
 
-            if (stream == null)
-            {
-                return;
-            }
-
+            url = getResourceURL(random + ".wav");
+            stream = AudioSystem.getAudioInputStream(url);
             AudioFormat format = stream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
             clip = (Clip) AudioSystem.getLine(info);
@@ -93,10 +84,19 @@ public class ImbuedFartPlugin extends Plugin
             volume.setValue(volumeValue);
 
             clip.start();
-        }
-        catch (Exception e) {
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
+    }
+
+    private URL getResourceURL(String path)
+    {
+        return getContextClassLoader().getResource(path);
+    }
+
+    private ClassLoader getContextClassLoader()
+    {
+        return Thread.currentThread().getContextClassLoader();
     }
 
 }
