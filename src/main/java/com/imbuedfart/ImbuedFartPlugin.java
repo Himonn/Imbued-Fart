@@ -67,7 +67,7 @@ public class ImbuedFartPlugin extends Plugin
 
             URL url = null;
             AudioInputStream stream = null;
-            int random = ThreadLocalRandom.current().nextInt(1, 11);
+            int random = ThreadLocalRandom.current().nextInt(1, 17);
             log.info(random + ".wav");
 
             url = getResourceURL(random + ".wav");
