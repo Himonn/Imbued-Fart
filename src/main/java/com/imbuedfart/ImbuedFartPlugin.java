@@ -55,7 +55,7 @@ public class ImbuedFartPlugin extends Plugin
     @Subscribe
     public void onSoundEffectPlayed(SoundEffectPlayed event)
     {
-        if (event.getSoundId() == 3887)
+        if (event.getSoundId() == 3887 || event.getSoundId() == 6847)
         {
             event.consume();
             playRandomFart();
