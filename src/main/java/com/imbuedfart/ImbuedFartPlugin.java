@@ -43,7 +43,12 @@ public class ImbuedFartPlugin extends Plugin
     {
         if (event.getCommand().equals("fart"))
         {
-            playFart();
+            playRandomFart();
+        }
+
+        if (event.getCommand().equals("allfarts"))
+        {
+            playSequentialFarts();
         }
     }
 
@@ -53,11 +58,32 @@ public class ImbuedFartPlugin extends Plugin
         if (event.getSoundId() == 3887)
         {
             event.consume();
-            playFart();
+            playRandomFart();
         }
     }
 
-    public void playFart()
+    public void playRandomFart()
+    {
+        int random = ThreadLocalRandom.current().nextInt(1, 17);
+
+        playFart(random);
+    }
+
+    public void playSequentialFarts()
+    {
+        for (int i = 1; i <= 17; i++)
+        {
+            playFart(i);
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void playFart(int index)
     {
         try {
             if (clip != null)
@@ -67,10 +93,9 @@ public class ImbuedFartPlugin extends Plugin
 
             URL url = null;
             AudioInputStream stream = null;
-            int random = ThreadLocalRandom.current().nextInt(1, 17);
-            log.info(random + ".wav");
+            log.debug(index + ".wav");
 
-            url = getResourceURL(random + ".wav");
+            url = getResourceURL(index + ".wav");
             stream = AudioSystem.getAudioInputStream(url);
             AudioFormat format = stream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
