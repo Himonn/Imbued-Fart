@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @PluginDescriptor(
         name = "Imbued Fart",
         enabledByDefault = false,
-        description = "Plays a fart noise instead of the imbued heart sound"
+        description = "Plays a fart noise instead of the imbued heart sound @Hooti_osrs"
 )
 public class ImbuedFartPlugin extends Plugin
 {
