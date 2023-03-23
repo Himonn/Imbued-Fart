@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -31,6 +32,12 @@ public class ImbuedFartPlugin extends Plugin
     private ImbuedFartConfig config;
 
     private Clip clip;
+
+    @Override
+    protected void startUp()
+    {
+//        listAllResources();
+    }
 
     @Provides
     ImbuedFartConfig provideConfig(final ConfigManager configManager)
@@ -93,9 +100,20 @@ public class ImbuedFartPlugin extends Plugin
 
             URL url = null;
             AudioInputStream stream = null;
-            log.debug(index + ".wav");
+            Class pluginClass = null;
 
-            url = getResourceURL(index + ".wav");
+            try {
+                pluginClass = Class.forName("com.imbuedfart.ImbuedFartPlugin");
+                url = pluginClass.getClassLoader().getResource(index + ".wav");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            if (url == null)
+            {
+                return;
+            }
+
             stream = AudioSystem.getAudioInputStream(url);
             AudioFormat format = stream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
@@ -124,4 +142,21 @@ public class ImbuedFartPlugin extends Plugin
         return Thread.currentThread().getContextClassLoader();
     }
 
+    public void listAllResources()
+    {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        String path = ""; // Set this to the path you want to list resources for (e.g. "com/example/myapp")
+
+        Enumeration<URL> resources = null;
+        try {
+            resources = classLoader.getResources(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        while (resources.hasMoreElements()) {
+            URL resourceUrl = resources.nextElement();
+            log.info(resourceUrl.getFile());
+        }
+    }
 }
