@@ -39,6 +39,15 @@ public class ImbuedFartPlugin extends Plugin
         return configManager.getConfig(ImbuedFartConfig.class);
     }
 
+    @Override
+    protected void shutDown() throws Exception
+    {
+        if (clip != null && clip.isOpen())
+        {
+            clip.close();
+        }
+    }
+
     @Subscribe
     public void onCommandExecuted(CommandExecuted event)
     {
