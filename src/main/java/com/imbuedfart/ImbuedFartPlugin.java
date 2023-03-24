@@ -33,12 +33,6 @@ public class ImbuedFartPlugin extends Plugin
 
     private Clip clip;
 
-    @Override
-    protected void startUp()
-    {
-//        listAllResources();
-    }
-
     @Provides
     ImbuedFartConfig provideConfig(final ConfigManager configManager)
     {
@@ -98,23 +92,20 @@ public class ImbuedFartPlugin extends Plugin
                 clip.close();
             }
 
-            URL url = null;
             AudioInputStream stream = null;
-            Class pluginClass = null;
+            InputStream is;
+            String filename = String.format("/%s.wav", index);
 
-            try {
-                pluginClass = Class.forName("com.imbuedfart.ImbuedFartPlugin");
-                url = pluginClass.getClassLoader().getResource(index + ".wav");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            is = getClass().getResourceAsStream(filename);
 
-            if (url == null)
-            {
+            if (is == null) {
+                log.debug(String.format("Resource not found: %s", filename));
                 return;
             }
 
-            stream = AudioSystem.getAudioInputStream(url);
+            BufferedInputStream bis = new BufferedInputStream(is);
+
+            stream = AudioSystem.getAudioInputStream(bis);
             AudioFormat format = stream.getFormat();
             DataLine.Info info = new DataLine.Info(Clip.class, format);
             clip = (Clip) AudioSystem.getLine(info);
@@ -132,31 +123,4 @@ public class ImbuedFartPlugin extends Plugin
         }
     }
 
-    private URL getResourceURL(String path)
-    {
-        return getContextClassLoader().getResource(path);
-    }
-
-    private ClassLoader getContextClassLoader()
-    {
-        return Thread.currentThread().getContextClassLoader();
-    }
-
-    public void listAllResources()
-    {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String path = ""; // Set this to the path you want to list resources for (e.g. "com/example/myapp")
-
-        Enumeration<URL> resources = null;
-        try {
-            resources = classLoader.getResources(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        while (resources.hasMoreElements()) {
-            URL resourceUrl = resources.nextElement();
-            log.info(resourceUrl.getFile());
-        }
-    }
 }
