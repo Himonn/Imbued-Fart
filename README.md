@@ -8,6 +8,10 @@ https://twitter.com/shrimpthegimp
 
 https://twitter.com/stillceej
 
+https://twitter.com/GazdonRamsay
+
+@rsneckbeard on Discord
+
 ## Features
 
 - Replaces imbued fart and saturated heart with fart sounds
@@ -16,4 +20,4 @@ https://twitter.com/stillceej
 
 
 ## Contact
-Himon#0594 on Discord
+@himon on Discord

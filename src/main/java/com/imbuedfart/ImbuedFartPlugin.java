@@ -3,7 +3,11 @@ package com.imbuedfart;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.events.CommandExecuted;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -13,8 +17,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 import javax.inject.Inject;
 import javax.sound.sampled.*;
 import java.io.*;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -27,11 +29,12 @@ public class ImbuedFartPlugin extends Plugin
 {
     @Inject
     private Client client;
-
     @Inject
     private ImbuedFartConfig config;
 
     private Clip clip;
+
+    private static final int FART_FILE_COUNT = 17;
 
     @Provides
     ImbuedFartConfig provideConfig(final ConfigManager configManager)
@@ -45,6 +48,45 @@ public class ImbuedFartPlugin extends Plugin
         if (clip != null && clip.isOpen())
         {
             clip.close();
+        }
+    }
+
+    @Subscribe
+    public void onMenuOptionClicked(MenuOptionClicked event)
+    {
+        if (!config.menuEntryTrigger())
+        {
+            return;
+        }
+
+        if (event.getMenuOption().toLowerCase().contains("invigorate")
+                && event.getMenuTarget().toLowerCase().contains("heart")
+                && event.getMenuAction().equals(MenuAction.CC_OP))
+        {
+            playRandomFart();
+        }
+    }
+
+    @Subscribe
+    public void onMenuEntryAdded(MenuEntryAdded event)
+    {
+        if (!config.fartMenuEntry())
+        {
+            return;
+        }
+
+        if (event.getMenuEntry().getOption().toLowerCase().contains("invigorate")
+                && event.getMenuEntry().getTarget().toLowerCase().contains("heart")
+                && event.getMenuEntry().getType().equals(MenuAction.CC_OP))
+        {
+            client.createMenuEntry(-1)
+                    .setOption("Fart")
+                    .setTarget(event.getTarget())
+                    .setIdentifier(event.getIdentifier())
+                    .setParam0(event.getActionParam0())
+                    .setParam1(event.getActionParam1())
+                    .setType(MenuAction.RUNELITE)
+                    .onClick(this::playRandomFart);
         }
     }
 
@@ -68,20 +110,29 @@ public class ImbuedFartPlugin extends Plugin
         if (event.getSoundId() == 3887 || event.getSoundId() == 6847)
         {
             event.consume();
-            playRandomFart();
+
+            if (!config.menuEntryTrigger())
+            {
+                playRandomFart();
+            }
         }
+    }
+
+    public void playRandomFart(MenuEntry menuEntry)
+    {
+        playRandomFart();
     }
 
     public void playRandomFart()
     {
-        int random = ThreadLocalRandom.current().nextInt(1, 17);
+        int random = ThreadLocalRandom.current().nextInt(1, FART_FILE_COUNT);
 
         playFart(random);
     }
 
     public void playSequentialFarts()
     {
-        for (int i = 1; i <= 17; i++)
+        for (int i = 1; i <= FART_FILE_COUNT; i++)
         {
             playFart(i);
 

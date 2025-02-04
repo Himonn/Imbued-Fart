@@ -21,4 +21,20 @@ public interface ImbuedFartConfig extends Config {
     default int volumeLevel() {
         return 10;
     }
+
+    @ConfigItem(
+            keyName = "fartMenuEntry",
+            name = "Show Fart Menu Entry",
+            description = "Adds a fart option to your imbued / saturated heart",
+            position = 10
+    )
+    default boolean fartMenuEntry() { return false; }
+
+    @ConfigItem(
+            keyName = "menuEntryTrigger",
+            name = "Trigger on Click",
+            description = "Triggers on click, instead of sound effect, prevents rev spamming, prevents others",
+            position = 10
+    )
+    default boolean menuEntryTrigger() { return false; }
 }
