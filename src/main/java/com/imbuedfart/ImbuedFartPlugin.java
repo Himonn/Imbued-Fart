@@ -22,7 +22,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @PluginDescriptor(
         name = "Imbued Fart",
-        enabledByDefault = false,
         description = "Plays a fart noise instead of the imbued heart sound @Hooti_osrs"
 )
 public class ImbuedFartPlugin extends Plugin
