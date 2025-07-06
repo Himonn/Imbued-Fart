@@ -17,6 +17,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 import javax.inject.Inject;
 import javax.sound.sampled.*;
 import java.io.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -33,12 +35,20 @@ public class ImbuedFartPlugin extends Plugin
 
     private Clip clip;
 
-    private static final int FART_FILE_COUNT = 17;
+    private static final int FART_FILE_COUNT = 22;
+
+    public static ExecutorService executorService;
 
     @Provides
     ImbuedFartConfig provideConfig(final ConfigManager configManager)
     {
         return configManager.getConfig(ImbuedFartConfig.class);
+    }
+
+    @Override
+    protected void startUp() throws Exception
+    {
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -48,6 +58,8 @@ public class ImbuedFartPlugin extends Plugin
         {
             clip.close();
         }
+
+        executorService.shutdown();
     }
 
     @Subscribe
@@ -78,7 +90,7 @@ public class ImbuedFartPlugin extends Plugin
                 && event.getMenuEntry().getTarget().toLowerCase().contains("heart")
                 && event.getMenuEntry().getType().equals(MenuAction.CC_OP))
         {
-            client.createMenuEntry(-1)
+            client.getMenu().createMenuEntry(-1)
                     .setOption("Fart")
                     .setTarget(event.getTarget())
                     .setIdentifier(event.getIdentifier())
@@ -99,7 +111,7 @@ public class ImbuedFartPlugin extends Plugin
 
         if (event.getCommand().equals("allfarts"))
         {
-            playSequentialFarts();
+            executorService.submit(this::playSequentialFarts);
         }
     }
 
@@ -126,7 +138,9 @@ public class ImbuedFartPlugin extends Plugin
     {
         int random = ThreadLocalRandom.current().nextInt(1, FART_FILE_COUNT);
 
-        playFart(random);
+        executorService.submit(() -> {
+            playFart(random);
+        });
     }
 
     public void playSequentialFarts()
