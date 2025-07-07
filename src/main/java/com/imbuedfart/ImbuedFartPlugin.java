@@ -13,9 +13,9 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.audio.AudioPlayer;
 
 import javax.inject.Inject;
-import javax.sound.sampled.*;
 import java.io.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,14 +26,15 @@ import java.util.concurrent.ThreadLocalRandom;
         name = "Imbued Fart",
         description = "Plays a fart noise instead of the imbued heart sound @Hooti_osrs"
 )
-public class ImbuedFartPlugin extends Plugin
-{
+public class ImbuedFartPlugin extends Plugin {
     @Inject
     private Client client;
+
     @Inject
     private ImbuedFartConfig config;
 
-    private Clip clip;
+    @Inject
+    private AudioPlayer audioPlayer;
 
     private static final int FART_FILE_COUNT = 22;
 
@@ -54,11 +55,6 @@ public class ImbuedFartPlugin extends Plugin
     @Override
     protected void shutDown() throws Exception
     {
-        if (clip != null && clip.isOpen())
-        {
-            clip.close();
-        }
-
         executorService.shutdown();
     }
 
@@ -137,10 +133,7 @@ public class ImbuedFartPlugin extends Plugin
     public void playRandomFart()
     {
         int random = ThreadLocalRandom.current().nextInt(1, FART_FILE_COUNT);
-
-        executorService.submit(() -> {
-            playFart(random);
-        });
+        executorService.submit(() -> playFart(random));
     }
 
     public void playSequentialFarts()
@@ -149,9 +142,11 @@ public class ImbuedFartPlugin extends Plugin
         {
             playFart(i);
 
-            try {
+            try
+            {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e)
+            {
                 throw new RuntimeException(e);
             }
         }
@@ -159,41 +154,22 @@ public class ImbuedFartPlugin extends Plugin
 
     public void playFart(int index)
     {
-        try {
-            if (clip != null)
-            {
-                clip.close();
-            }
+        String filename = String.format("/%s.wav", index);
+        InputStream is = getClass().getResourceAsStream(filename);
 
-            AudioInputStream stream = null;
-            InputStream is;
-            String filename = String.format("/%s.wav", index);
+        if (is == null)
+        {
+            log.debug("Resource not found: {}", filename);
+            return;
+        }
 
-            is = getClass().getResourceAsStream(filename);
-
-            if (is == null) {
-                log.debug(String.format("Resource not found: %s", filename));
-                return;
-            }
-
-            BufferedInputStream bis = new BufferedInputStream(is);
-
-            stream = AudioSystem.getAudioInputStream(bis);
-            AudioFormat format = stream.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, format);
-            clip = (Clip) AudioSystem.getLine(info);
-
-            clip.open(stream);
-
-            FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            float volumeValue = volume.getMinimum() + ((50 + (config.volumeLevel()*5)) * ((volume.getMaximum() - volume.getMinimum()) / 100));
-
-            volume.setValue(volumeValue);
-
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
+        int volume = config.volumeLevel() * 10;
+        try
+        {
+            audioPlayer.play(is, volume);
+        } catch (Exception e)
+        {
+            log.error("Error playing sound: {}", filename);
         }
     }
-
 }
