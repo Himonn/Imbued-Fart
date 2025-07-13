@@ -163,13 +163,14 @@ public class ImbuedFartPlugin extends Plugin {
             return;
         }
 
-        int volume = config.volumeLevel() * 10;
+        BufferedInputStream bufferedIs = new BufferedInputStream(is);
+
         try
         {
-            audioPlayer.play(is, volume);
+            audioPlayer.play(bufferedIs, config.gain());
         } catch (Exception e)
         {
-            log.error("Error playing sound: {}", filename);
+            log.error(e.getMessage(), e);
         }
     }
 }
