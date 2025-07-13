@@ -155,19 +155,10 @@ public class ImbuedFartPlugin extends Plugin {
     public void playFart(int index)
     {
         String filename = String.format("/%s.wav", index);
-        InputStream is = getClass().getResourceAsStream(filename);
-
-        if (is == null)
-        {
-            log.debug("Resource not found: {}", filename);
-            return;
-        }
-
-        BufferedInputStream bufferedIs = new BufferedInputStream(is);
 
         try
         {
-            audioPlayer.play(bufferedIs, config.gain());
+            audioPlayer.play(this.getClass(), filename, config.gain());
         } catch (Exception e)
         {
             log.error(e.getMessage(), e);
